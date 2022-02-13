@@ -1,0 +1,12 @@
+name: "GitHub Asana Integration"
+description: "Comment on Asana tasks when referenced from GitHub issues and pull requests"
+inputs:
+  asana-pat:
+    description: "Asana Personal Access Token."
+    required: true
+  comment-prefix:
+    description: "Text prefix for the comments added to Asana."
+    required: false
+runs:
+  using: "node16"
+  main: "dist/index.js"
