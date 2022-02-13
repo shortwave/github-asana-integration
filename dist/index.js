@@ -73203,6 +73203,10 @@ async function main() {
     while ((rawParseUrl = ASANA_TASK_LINK_REGEX.exec(text)) !== null) {
         tasks.add(rawParseUrl.groups.taskId);
     }
+    if (tasks.size === 0) {
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)('No Asana tasks referenced. Done.');
+        return;
+    }
     const options = {
         defaultHeaders: { 'asana-enable': 'string_ids' },
         logAsanaChangeWarnings: false,

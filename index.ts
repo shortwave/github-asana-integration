@@ -44,6 +44,11 @@ async function main() {
     tasks.add(rawParseUrl.groups.taskId);
   }
 
+  if (tasks.size === 0) {
+    info('No Asana tasks referenced. Done.');
+    return;
+  }
+
   const options = {
     defaultHeaders: { 'asana-enable': 'string_ids' },
     logAsanaChangeWarnings: false,
