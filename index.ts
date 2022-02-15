@@ -72,7 +72,7 @@ async function main() {
   const previousTasks = (previous && extractTasks(previous)) ?? new Set<string>();
   const currentTasks = extractTasks(text);
   const tasks = difference(currentTasks, previousTasks);
-  const deduped = tasks.size - currentTasks.size;
+  const deduped = currentTasks.size - tasks.size;
   if (deduped > 0) {
     info(`Deduplicated ${deduped} tasks`);
   }

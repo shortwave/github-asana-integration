@@ -73227,7 +73227,7 @@ async function main() {
     const previousTasks = (_a = (previous && extractTasks(previous))) !== null && _a !== void 0 ? _a : new Set();
     const currentTasks = extractTasks(text);
     const tasks = difference(currentTasks, previousTasks);
-    const deduped = tasks.size - currentTasks.size;
+    const deduped = currentTasks.size - tasks.size;
     if (deduped > 0) {
         (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(`Deduplicated ${deduped} tasks`);
     }
