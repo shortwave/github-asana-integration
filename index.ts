@@ -10,21 +10,32 @@ async function addComment(client: Client, taskId: string, comment: string): Prom
   info(`Added the GitHub link to the Asana task: ${taskId}`);
 }
 
-function extractGitHubEventParameters(): {url: string, text: string} {
+function getPreviousText(): string | null {
+  if (context.action === 'edited') {
+    return context.payload.changes;
+  }
+
+  return null;
+}
+
+function extractGitHubEventParameters(): {url: string, text: string, previous: string | null} {
   const pullRequest = context.payload.pull_request;
   const issue = context.payload.issue
   const comment = context.payload.comment;
+  const previous = getPreviousText();
   if (pullRequest) {
     info(`Extracting information from PR: ${pullRequest.html_url}`);
     return {
       url: pullRequest.html_url,
       text: pullRequest.body,
+      previous,
     }
   } else if (issue && comment) {
     info(`Extracting information from issue: ${issue.html_url}`);
     return {
       url: comment.html_url,
       text: comment.body,
+      previous,
     }
   }
 
@@ -37,7 +48,8 @@ async function main() {
     throw new Error('Asana personal access token (asana-pat) not specified');
   }
 
-  const { url, text } = extractGitHubEventParameters();
+  const { url, text, previous } = extractGitHubEventParameters();
+  info(JSON.stringify(previous));
   const tasks = new Set<string>();
   let rawParseUrl: RegExpExecArray | null;
   while ((rawParseUrl = ASANA_TASK_LINK_REGEX.exec(text)) !== null) {
