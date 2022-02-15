@@ -73172,15 +73172,23 @@ async function addComment(client, taskId, comment) {
     await client.tasks.addComment(taskId, { text: comment });
     (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(`Added the GitHub link to the Asana task: ${taskId}`);
 }
+function getPreviousText() {
+    if (_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.action === 'edited') {
+        return _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.changes;
+    }
+    return null;
+}
 function extractGitHubEventParameters() {
     const pullRequest = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request;
     const issue = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.issue;
     const comment = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.comment;
+    const previous = getPreviousText();
     if (pullRequest) {
         (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(`Extracting information from PR: ${pullRequest.html_url}`);
         return {
             url: pullRequest.html_url,
             text: pullRequest.body,
+            previous,
         };
     }
     else if (issue && comment) {
@@ -73188,6 +73196,7 @@ function extractGitHubEventParameters() {
         return {
             url: comment.html_url,
             text: comment.body,
+            previous,
         };
     }
     throw new Error('Must be used on pull_request and issue_comment events only');
@@ -73197,7 +73206,8 @@ async function main() {
     if (!personalAccessToken) {
         throw new Error('Asana personal access token (asana-pat) not specified');
     }
-    const { url, text } = extractGitHubEventParameters();
+    const { url, text, previous } = extractGitHubEventParameters();
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(JSON.stringify(previous));
     const tasks = new Set();
     let rawParseUrl;
     while ((rawParseUrl = ASANA_TASK_LINK_REGEX.exec(text)) !== null) {
