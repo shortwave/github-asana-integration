@@ -73173,9 +73173,8 @@ async function addComment(client, taskId, comment) {
     (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(`Added the GitHub link to the Asana task: ${taskId}`);
 }
 function getPreviousText() {
-    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(JSON.stringify(_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload));
     if (_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.action === 'edited') {
-        return _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.changes;
+        return _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.changes.body.from;
     }
     return null;
 }
@@ -73202,20 +73201,38 @@ function extractGitHubEventParameters() {
     }
     throw new Error('Must be used on pull_request and issue_comment events only');
 }
-async function main() {
-    const personalAccessToken = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('asana-pat');
-    if (!personalAccessToken) {
-        throw new Error('Asana personal access token (asana-pat) not specified');
-    }
-    const { url, text, previous } = extractGitHubEventParameters();
-    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(JSON.stringify(previous));
+function extractTasks(text) {
+    ASANA_TASK_LINK_REGEX.lastIndex = 0;
     const tasks = new Set();
     let rawParseUrl;
     while ((rawParseUrl = ASANA_TASK_LINK_REGEX.exec(text)) !== null) {
         tasks.add(rawParseUrl.groups.taskId);
     }
+    return tasks;
+}
+function difference(setA, setB) {
+    let diff = new Set(setA);
+    for (let elem of setB) {
+        diff.delete(elem);
+    }
+    return diff;
+}
+async function main() {
+    var _a;
+    const personalAccessToken = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('asana-pat');
+    if (!personalAccessToken) {
+        throw new Error('Asana personal access token (asana-pat) not specified');
+    }
+    const { url, text, previous } = extractGitHubEventParameters();
+    const previousTasks = (_a = (previous && extractTasks(previous))) !== null && _a !== void 0 ? _a : new Set();
+    const currentTasks = extractTasks(text);
+    const tasks = difference(currentTasks, previousTasks);
+    const deduped = tasks.size - currentTasks.size;
+    if (deduped > 0) {
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(`Deduplicated ${deduped} tasks`);
+    }
     if (tasks.size === 0) {
-        (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)('No Asana tasks referenced. Done.');
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)('No new Asana tasks referenced. Done.');
         return;
     }
     const options = {

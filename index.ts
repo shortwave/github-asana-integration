@@ -11,9 +11,8 @@ async function addComment(client: Client, taskId: string, comment: string): Prom
 }
 
 function getPreviousText(): string | null {
-  info(JSON.stringify(context.payload));
   if (context.payload.action === 'edited') {
-    return context.payload.changes;
+    return context.payload.changes.body.from;
   }
 
   return null;
@@ -23,7 +22,7 @@ function extractGitHubEventParameters(): {url: string, text: string, previous: s
   const pullRequest = context.payload.pull_request;
   const issue = context.payload.issue
   const comment = context.payload.comment;
-  const previous = getPreviousText();
+  const previous: string | null = getPreviousText();
   if (pullRequest) {
     info(`Extracting information from PR: ${pullRequest.html_url}`);
     return {
@@ -43,6 +42,26 @@ function extractGitHubEventParameters(): {url: string, text: string, previous: s
   throw new Error('Must be used on pull_request and issue_comment events only');
 }
 
+function extractTasks(text: string): Set<string> {
+  ASANA_TASK_LINK_REGEX.lastIndex = 0;
+  const tasks = new Set<string>();
+  let rawParseUrl: RegExpExecArray | null;
+  while ((rawParseUrl = ASANA_TASK_LINK_REGEX.exec(text)) !== null) {
+    tasks.add(rawParseUrl.groups.taskId);
+  }
+
+  return tasks;
+}
+
+function difference(setA: Set<string>, setB: Set<string>): Set<string> {
+  let diff = new Set<string>(setA);
+  for (let elem of setB) {
+    diff.delete(elem);
+  }
+
+  return diff;
+}
+
 async function main() {
   const personalAccessToken = getInput('asana-pat');
   if (!personalAccessToken) {
@@ -50,15 +69,16 @@ async function main() {
   }
 
   const { url, text, previous } = extractGitHubEventParameters();
-  info(JSON.stringify(previous));
-  const tasks = new Set<string>();
-  let rawParseUrl: RegExpExecArray | null;
-  while ((rawParseUrl = ASANA_TASK_LINK_REGEX.exec(text)) !== null) {
-    tasks.add(rawParseUrl.groups.taskId);
+  const previousTasks = (previous && extractTasks(previous)) ?? new Set<string>();
+  const currentTasks = extractTasks(text);
+  const tasks = difference(currentTasks, previousTasks);
+  const deduped = tasks.size - currentTasks.size;
+  if (deduped > 0) {
+    info(`Deduplicated ${deduped} tasks`);
   }
 
   if (tasks.size === 0) {
-    info('No Asana tasks referenced. Done.');
+    info('No new Asana tasks referenced. Done.');
     return;
   }
 
