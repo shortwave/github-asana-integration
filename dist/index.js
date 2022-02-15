@@ -73174,7 +73174,7 @@ async function addComment(client, taskId, comment) {
 }
 function getPreviousText() {
     (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(JSON.stringify(_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload));
-    if (_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.action === 'edited') {
+    if (_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.action === 'edited') {
         return _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.changes;
     }
     return null;

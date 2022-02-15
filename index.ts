@@ -12,7 +12,7 @@ async function addComment(client: Client, taskId: string, comment: string): Prom
 
 function getPreviousText(): string | null {
   info(JSON.stringify(context.payload));
-  if (context.action === 'edited') {
+  if (context.payload.action === 'edited') {
     return context.payload.changes;
   }
 
