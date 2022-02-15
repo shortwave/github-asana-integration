@@ -11,6 +11,7 @@ async function addComment(client: Client, taskId: string, comment: string): Prom
 }
 
 function getPreviousText(): string | null {
+  info(JSON.stringify(context.payload));
   if (context.action === 'edited') {
     return context.payload.changes;
   }
