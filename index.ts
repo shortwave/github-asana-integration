@@ -10,32 +10,29 @@ async function addComment(client: Client, taskId: string, comment: string): Prom
   info(`Added the GitHub link to the Asana task: ${taskId}`);
 }
 
-function getPreviousText(): string | null {
+function getPreviousText(): {text?: string} {
   if (context.payload.action === 'edited') {
-    return context.payload.changes.body.from;
+    return {text: context.payload.changes.body.from};
   }
 
-  return null;
+  return {};
 }
 
-function extractGitHubEventParameters(): {url: string, text: string, previous: string | null} {
+function getCurrentTextAndUrl(): {url: string, text: string} {
   const pullRequest = context.payload.pull_request;
   const issue = context.payload.issue
   const comment = context.payload.comment;
-  const previous: string | null = getPreviousText();
   if (pullRequest) {
     info(`Extracting information from PR: ${pullRequest.html_url}`);
     return {
       url: pullRequest.html_url,
       text: pullRequest.body,
-      previous,
     }
   } else if (issue && comment) {
     info(`Extracting information from issue: ${issue.html_url}`);
     return {
       url: comment.html_url,
       text: comment.body,
-      previous,
     }
   }
 
@@ -68,9 +65,12 @@ async function main() {
     throw new Error('Asana personal access token (asana-pat) not specified');
   }
 
-  const { url, text, previous } = extractGitHubEventParameters();
-  const previousTasks = (previous && extractTasks(previous)) ?? new Set<string>();
+  const { url, text } = getCurrentTextAndUrl();
   const currentTasks = extractTasks(text);
+
+  const { text: previous } = getPreviousText();
+  const previousTasks = (previous && extractTasks(previous)) ?? new Set<string>();
+
   const tasks = difference(currentTasks, previousTasks);
   const deduped = currentTasks.size - tasks.size;
   if (deduped > 0) {

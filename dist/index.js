@@ -73174,21 +73174,19 @@ async function addComment(client, taskId, comment) {
 }
 function getPreviousText() {
     if (_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.action === 'edited') {
-        return _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.changes.body.from;
+        return { text: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.changes.body.from };
     }
-    return null;
+    return {};
 }
-function extractGitHubEventParameters() {
+function getCurrentTextAndUrl() {
     const pullRequest = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request;
     const issue = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.issue;
     const comment = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.comment;
-    const previous = getPreviousText();
     if (pullRequest) {
         (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(`Extracting information from PR: ${pullRequest.html_url}`);
         return {
             url: pullRequest.html_url,
             text: pullRequest.body,
-            previous,
         };
     }
     else if (issue && comment) {
@@ -73196,7 +73194,6 @@ function extractGitHubEventParameters() {
         return {
             url: comment.html_url,
             text: comment.body,
-            previous,
         };
     }
     throw new Error('Must be used on pull_request and issue_comment events only');
@@ -73223,9 +73220,10 @@ async function main() {
     if (!personalAccessToken) {
         throw new Error('Asana personal access token (asana-pat) not specified');
     }
-    const { url, text, previous } = extractGitHubEventParameters();
-    const previousTasks = (_a = (previous && extractTasks(previous))) !== null && _a !== void 0 ? _a : new Set();
+    const { url, text } = getCurrentTextAndUrl();
     const currentTasks = extractTasks(text);
+    const { text: previous } = getPreviousText();
+    const previousTasks = (_a = (previous && extractTasks(previous))) !== null && _a !== void 0 ? _a : new Set();
     const tasks = difference(currentTasks, previousTasks);
     const deduped = currentTasks.size - tasks.size;
     if (deduped > 0) {
