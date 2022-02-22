@@ -73173,8 +73173,12 @@ async function addComment(client, taskId, comment) {
     (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(`Added the GitHub link to the Asana task: ${taskId}`);
 }
 function getPreviousText() {
+    var _a, _b;
     if (_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.action === 'edited') {
-        return { text: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.changes.body.from };
+        const text = (_b = (_a = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.changes) === null || _a === void 0 ? void 0 : _a.body) === null || _b === void 0 ? void 0 : _b.from;
+        if (text) {
+            return { text };
+        }
     }
     return {};
 }
