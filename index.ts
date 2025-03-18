@@ -3,7 +3,7 @@ import { context } from '@actions/github';
 import { Client } from 'asana';
 
 
-const ASANA_TASK_LINK_REGEX = /https:\/\/app\.asana\.com\/(?:(?:\d+\/home\/\d+\/)|(?:\d+\/\d+\/project\/\d+\/task\/))(?<taskId>\d+)/ig;
+const ASANA_TASK_LINK_REGEX = /https:\/\/app\.asana\.com\/(?:\d+\/(?:home\/\d+\/|\d+\/)|\d+\/\d+\/project\/\d+\/task\/)(?<taskId>\d+)/ig;
 
 async function addComment(client: Client, taskId: string, comment: string): Promise<void> {
   await client.tasks.addComment(taskId, {text: comment});
