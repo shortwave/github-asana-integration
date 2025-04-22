@@ -69,6 +69,7 @@ async function main() {
   }
 
   const { url, text } = getCurrentTextAndUrl();
+  info(`Running detection on ${text}`);
   const currentTasks = extractTasks(text);
 
   const { text: previous } = getPreviousText();
