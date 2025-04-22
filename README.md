@@ -20,3 +20,13 @@ uses: shortwave/github-asana-integration@main
 with:
   asana-pat: ${{ secrets.ASANA_TOKEN }}
 ```
+
+# Development
+
+Make sure to build and commit any changes to the `dist` folder.
+
+```bash
+npm install
+npm run build
+```
+

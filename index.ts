@@ -69,7 +69,6 @@ async function main() {
   }
 
   const { url, text } = getCurrentTextAndUrl();
-  info(`Running detection on ${text}`);
   const currentTasks = extractTasks(text);
 
   const { text: previous } = getPreviousText();
@@ -97,8 +96,6 @@ async function main() {
     await addComment(client, taskId, comment);
   }
 }
-
-info('Running setup');
 
 (async () => {
   try {

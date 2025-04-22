@@ -73167,7 +73167,7 @@ __nccwpck_require__.r(__webpack_exports__);
 
 
 
-const ASANA_TASK_LINK_REGEX = /https:\/\/app.asana.com\/(\d+)\/(?<project>\d+)\/(?<taskId>\d+).*?/ig;
+const ASANA_TASK_LINK_REGEX = /https:\/\/app\.asana\.com\/(?:\d+\/(?:home\/\d+\/|\d+\/)|\d+\/\d+\/project\/\d+\/task\/)(?<taskId>\d+)/ig;
 async function addComment(client, taskId, comment) {
     await client.tasks.addComment(taskId, { text: comment });
     (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.info)(`Added the GitHub link to the Asana task: ${taskId}`);
