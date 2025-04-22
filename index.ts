@@ -98,6 +98,8 @@ async function main() {
   }
 }
 
+info('Running setup');
+
 (async () => {
   try {
     await main();
